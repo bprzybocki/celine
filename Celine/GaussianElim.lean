@@ -89,6 +89,36 @@ def back_substitute (A : RatFuncMatrix m n) : RatFuncMatrix m n :=
 def gaussian_elim (A : RatFuncMatrix m n) : RatFuncMatrix m n :=
     back_substitute (normalize_pivots (row_echelon A))
 
+def transpose_aux (A : RatFuncMatrix m n) (At : RatFuncMatrix n m) (i j : Nat) : RatFuncMatrix n m :=
+    if hi : i < n then if hj : j < m then transpose_aux A (At.set i (At[i].set j A[j][i])) i (j+1) else
+    transpose_aux A At (i+1) 0 else At
+
+def transpose (A : RatFuncMatrix m n) : RatFuncMatrix n m :=
+    transpose_aux A (Vector.mkVector n (Vector.mkVector m ([],[]))) 0 0
+
+def get_free_col_aux (A : RatFuncMatrix m n) (i : Nat) : Option {i : Nat // i < n} :=
+    if h : i < m ∧ i < n then if is_zero_uni_ratfunc A[i][i] then some ⟨i,h.right⟩ else get_free_col_aux A (i+1) else
+    if h' : i < n then some ⟨i,h'⟩ else none
+    termination_by n-i
+
+def get_free_col (A : RatFuncMatrix m n) : Option {i : Nat // i < n} :=
+    get_free_col_aux A 0
+
+def pad_with_zeros (l : List UniRatFunc) (length : Nat) : Vector UniRatFunc length :=
+  if h1: l.length < length then pad_with_zeros (l.concat ([],[1])) length else
+  if h2 : l.length > length then { toList := l.take length, size_toArray := by simp; omega } else
+  { toList := l, size_toArray := by simp; omega }
+
+def get_nontrivial_sol_aux (A : RatFuncMatrix m n) : Option (Vector UniRatFunc n) :=
+    match get_free_col A with
+    | some ⟨i,h⟩ => let v := (transpose A)[i]
+    some ((Vector.map neg_uni_ratfunc (pad_with_zeros v.toList n)).set i ([1],[1]))
+    | none => none
+
+def get_nontrivial_sol (A : RatFuncMatrix m n) : Option (Vector UniRatFunc n) :=
+    get_nontrivial_sol_aux (gaussian_elim A)
+
 def M : RatFuncMatrix 3 4 := #v[#v[([],[1]), ([],[1]), ([0,1,1],[1]), ([1,2,1],[1])], #v[([1,1],[1]), ([1,1],[1]), ([-1,-2],[1]), ([-1,-1],[1])], #v[([-1],[1]), ([],[1]), ([1],[1]), ([],[1])]]
 
 #eval gaussian_elim M
+#eval get_nontrivial_sol M

@@ -49,6 +49,12 @@ def gcd_uni (a b : UniPolynomial) : UniPolynomial :=
   if h : b.length > 0 ∧ (canon_uni b).length > 0 then gcd_uni b ((div_uni a b).snd.take (b.length - 1)) else a
   termination_by b.length
 
+-- Substitutes b into a
+def subst_uni (a b : UniPolynomial) : UniPolynomial :=
+  match a with
+  | [] => []
+  | x :: xs => add_uni [x] (mult_uni b (subst_uni xs b))
+
 abbrev BiPolynomial := List UniPolynomial
 
 def all_zeros_bi (a : BiPolynomial) : Bool :=
@@ -77,6 +83,18 @@ def mult_bi (a b : BiPolynomial) : BiPolynomial :=
   | [], _ | _, [] => []
   | x1::xs, _ => add_bi (scale_bi b x1) ([]::(mult_bi xs b))
 
+def subst_inner_bi (a : BiPolynomial) (b : UniPolynomial) : BiPolynomial :=
+  List.map (fun a' => subst_uni a' b) a
+
+def subst_outer_bi (a : BiPolynomial) (b : UniPolynomial) : BiPolynomial :=
+  match a with
+  | [] => []
+  | x :: xs => add_bi [x] (mult_bi (List.map (fun b' => [b']) b) (subst_outer_bi xs b))
+
+-- Substitutes b for the inner variable and c for the outer variable
+def subst_bi (a : BiPolynomial) (b c : UniPolynomial) : BiPolynomial :=
+  subst_outer_bi (subst_inner_bi a b) c
+
 abbrev UniRatFunc := UniPolynomial × UniPolynomial
 
 def is_zero_uni_ratfunc (a : UniRatFunc) : Bool :=
@@ -100,3 +118,17 @@ def div_uni_ratfunc (a b : UniRatFunc) : UniRatFunc :=
 
 def inverse_uni_ratfunc (a : UniRatFunc) : UniRatFunc :=
   div_uni_ratfunc ([1],[1]) a
+
+abbrev BiRatFunc := BiPolynomial × BiPolynomial
+
+def add_bi_ratfunc (a b : BiRatFunc) : BiRatFunc :=
+  (add_bi (mult_bi a.fst b.snd) (mult_bi a.snd b.fst), mult_bi a.snd b.snd)
+
+def mult_bi_ratfunc (a b : BiRatFunc) : BiRatFunc :=
+  (mult_bi a.fst b.fst, mult_bi a.snd b.snd)
+
+def div_bi_ratfunc (a b : BiRatFunc) : BiRatFunc :=
+  (mult_bi a.fst b.snd, mult_bi a.snd b.fst)
+
+def subst_bi_ratfunc (a : BiRatFunc) (b c : UniPolynomial) : BiRatFunc :=
+  (subst_bi a.fst b c, subst_bi a.snd b c)
