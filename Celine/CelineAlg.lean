@@ -1,5 +1,4 @@
 import Celine.GaussianElim
-import Celine.PolynomialComputable
 
 -- Computes F(n-j,k-i)/F(n,k)
 def f_nj_ki (f1 f2 : BiRatFunc) (i j : Nat) : BiRatFunc :=
@@ -42,9 +41,9 @@ def bipoly_to_list_uniratfunc (a : BiPolynomial) : List UniRatFunc :=
 def get_matrix (l : List BiRatFunc) : RatFuncMatrix (get_m l) l.length :=
   transpose { toList := (List.map (fun x => pad_with_zeros (bipoly_to_list_uniratfunc x.fst) (get_m l)) l), size_toArray := by simp }
 
-def celine (f1 f2 : BiRatFunc) (I J : Nat) : Option (List UniRatFunc) :=
-  match get_nontrivial_sol (get_matrix (list_of_birats f1 f2 I J)) with
-  | some v => some v.toList
-  | none => none
+abbrev CelineRecurrence := List UniRatFunc
+
+def celine (f1 f2 : BiRatFunc) (I J : Nat) : Option (CelineRecurrence) :=
+  (get_nontrivial_sol (get_matrix (list_of_birats f1 f2 I J))).map fun v => v.toList
 
 #eval celine ([[1,1]],[[1,1],[-1]]) ([[0,1],[-1]],[[],[1]]) 1 1

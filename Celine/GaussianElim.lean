@@ -9,7 +9,7 @@ def mult_row (A : RatFuncMatrix m n) (i : Nat) (h : i < m) (a : UniRatFunc) : Ra
     A.set i (A[i].map (fun x => mult_uni_ratfunc x a))
 
 def add_mult_row (A : RatFuncMatrix m n) (i j : Nat) (h : i < m ∧ j < m) (a : UniRatFunc) : RatFuncMatrix m n :=
-    A.set j (A[j].zipWith (A[i].map (fun x => mult_uni_ratfunc x a)) add_uni_ratfunc)
+    A.set j (A[j].zipWith add_uni_ratfunc (A[i].map (fun x => mult_uni_ratfunc x a)))
 
 def get_next_nonzero_row (A : RatFuncMatrix m n) (i j : Nat) (h : i < m ∧ j < n) : {i' : Nat // i ≤ i' ∧ i' < m} :=
     if h' : is_zero_uni_ratfunc A[i][j] ∧ i+1 < m then
@@ -94,7 +94,7 @@ def transpose_aux (A : RatFuncMatrix m n) (At : RatFuncMatrix n m) (i j : Nat) :
     transpose_aux A At (i+1) 0 else At
 
 def transpose (A : RatFuncMatrix m n) : RatFuncMatrix n m :=
-    transpose_aux A (Vector.mkVector n (Vector.mkVector m ([],[]))) 0 0
+    transpose_aux A (Vector.replicate n (Vector.replicate m ([],[]))) 0 0
 
 def get_free_col_aux (A : RatFuncMatrix m n) (i : Nat) : Option {i : Nat // i < n} :=
     if h : i < m ∧ i < n then if is_zero_uni_ratfunc A[i][i] then some ⟨i,h.right⟩ else get_free_col_aux A (i+1) else
