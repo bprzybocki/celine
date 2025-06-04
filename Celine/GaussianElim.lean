@@ -116,8 +116,8 @@ def get_free_col (A : RatFuncMatrix m n) : Option {i : ℕ // i < n} :=
 -- Pad l with zeros to be of a given length, or else truncate it to be that length
 def pad_with_zeros (l : List UniRatFunc) (length : ℕ) : Vector UniRatFunc length :=
   if h1: l.length < length then pad_with_zeros (l.concat ([],[1])) length else
-  if h2 : l.length > length then { toList := l.take length, size_toArray := by simp; omega } else
-  { toList := l, size_toArray := by simp; omega }
+  if h2 : l.length > length then { toArray := (l.take length).toArray, size_toArray := by simp; omega } else
+  { toArray := l.toArray, size_toArray := by simp; omega }
 
 def get_nontrivial_sol_aux (A : RatFuncMatrix m n) : Option (Vector UniRatFunc n) :=
     match get_free_col A with

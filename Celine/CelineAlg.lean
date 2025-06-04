@@ -46,7 +46,7 @@ def bipoly_to_list_uniratfunc (a : BiPolynomial) : List UniRatFunc :=
 
 -- Construct the matrix as described in Sister Celine's algorithm
 def get_matrix (l : List BiRatFunc) : RatFuncMatrix (get_m l) l.length :=
-  transpose { toList := (List.map (fun x => pad_with_zeros (bipoly_to_list_uniratfunc x.fst) (get_m l)) l), size_toArray := by simp }
+  transpose { toArray := (List.map (fun x => pad_with_zeros (bipoly_to_list_uniratfunc x.fst) (get_m l)) l).toArray, size_toArray := by simp }
 
 -- A CelineRecurrence is a list of univariate rational functions, giving the coefficients of the recurrence
 abbrev CelineRecurrence := List UniRatFunc
