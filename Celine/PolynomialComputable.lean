@@ -2,7 +2,7 @@ import Mathlib.Data.Rat.Init
 
 -- A univariate polynomial is a list of coefficients
 -- We use rational numbers, but any field should work
-abbrev UniPolynomial := List Rat
+abbrev UniPolynomial := List ℚ
 
 -- Returns true if the list of coefficients is all zeros
 def all_zeros_uni (a : UniPolynomial) : Bool :=
